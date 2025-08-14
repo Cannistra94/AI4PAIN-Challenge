@@ -8,11 +8,9 @@ load('.\OptimizedClassifiers\High_classifier.mat');
 load('Lab.mat')
 
 % Change the path according to the local path
-% Serena's path
-main_dir = 'C:\Users\serena.moscato4\OneDrive - Alma Mater Studiorum Università di Bologna\PAINLESS\NeuroRehab\PAINLESS_Analysis\PAINLESS_Analysis\Data\Data_E4';
+% path
+main_dir = '\Data\Data_E4';
 
-% Giacomo's path
-% main_dir = 'C:\Users\Utente\Desktop\UNI\Magistrale\Tesi\PAINLESS_Analysis\Data\Data_E4';
 folders_raw = dir(main_dir);
 folders = folders_raw(3:end);
 
