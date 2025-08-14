@@ -6,10 +6,10 @@ aimed at shaping next-generation healthcare solutions.
 
 The challenge focuses on automated pain detection using multimodal physiological signals, including:
 
-Electrodermal Activity (EDA)
-Blood Volume Pulse (BVP)
-Respiratory (RESP)
-Peripheral Oxygen Saturation (SpO₂)
+-Electrodermal Activity (EDA)
+-Blood Volume Pulse (BVP)
+-Respiratory (RESP)
+-Peripheral Oxygen Saturation (SpO₂)
 
 Pain is inherently subjective and often difficult to measure objectively. Traditional self-report methods are limited by communication barriers and variability in pain perception. 
 This project explores the integration of signal processing, feature engineering, and machine learning (ML)/ deep learning (DL) to build robust models capable of providing objective pain assessments
