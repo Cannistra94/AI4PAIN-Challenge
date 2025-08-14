@@ -1,0 +1,123 @@
+# %%
+import numpy as np
+import pandas as pd
+import os
+import glob
+import matplotlib.pyplot as plt
+import matplotlib as mpl
+import neurokit2 as nk
+
+mpl.rcParams["lines.linewidth"] = 0.91
+# %matplotlib qt
+plt.style.use("seaborn-v0_8-whitegrid")
+import seaborn as sns
+
+sns.set_context("talk")
+
+from Data_Preparation.ppg_processing import filter_ppg, MSPTDfast
+
+# %%
+ppg_train_path = "AI4Pain 2025 Dataset/train/bvp/"
+ppg_val_path = "AI4Pain 2025 Dataset/validation/bvp/"
+
+# SM's path
+ppg_train_path = "AI4Pain 2025 Dataset/train/bvp/"
+ppg_val_path = "AI4Pain 2025 Dataset/validation/bvp/"
+
+subjects_train = sorted(os.listdir(ppg_train_path))
+
+# preparing bvp data for training
+fs = 100
+all_data = []
+all_labels = []
+all_column_names = []
+all_subject_ids = []
+all_ppi = []
+
+for i, sub in enumerate(subjects_train):
+    subject_csv = pd.read_csv(os.path.join(ppg_train_path, sub), header=0)
+
+    for col in subject_csv.columns:
+        values = subject_csv[col].dropna().values
+        filtered_values = filter_ppg(values)
+
+        _, onsets = MSPTDfast(filtered_values, sampling_rate=fs)
+        peaks = nk.ppg_findpeaks(filtered_values, sampling_rate=fs)["PPG_Peaks"]
+
+        # Extract inter-beat intervals
+        ppi = np.diff(peaks) / fs
+        # ppi = np.diff(onsets) / fs # to chech which one is better
+
+        # Extract heart rate
+        ppi_time = peaks[1:] / fs  # time in seconds
+
+        # Append the data
+        all_ppi.append(ppi)
+
+        # Determine label from column name
+        col_upper = col.upper()
+        if "BASELINE" in col_upper:
+            label = 0
+        elif "LOW" in col_upper:
+            label = 1
+        elif "HIGH" in col_upper:
+            label = 2
+        elif "REST" in col_upper:
+            label = 3
+        else:
+            label = -1  # unknown or unexpected pattern
+
+        all_labels.append(label)
+        all_column_names.append(col)  # Use the actual column name
+        all_subject_ids.append(sub.split(".")[0])  # Extract subject ID from filename
+
+print(len(all_labels))
+print(len(all_column_names))
+print(len(all_ppi))
+
+# %%
+plt.figure(figsize=(10, 6))
+plt.plot(all_ppi[89], label="PP Intervals")
+# %%
+
+# EDA
+eda_train_path = "AI4Pain 2025 Dataset/train/eda/"
+eda_val_path = "AI4Pain 2025 Dataset/validation/eda/"
+
+all_data_eda = []
+all_labels_eda = []
+all_column_names_eda = []
+all_subject_ids_eda = []
+all_features_eda = []
+
+subjects_train = sorted(os.listdir(eda_train_path))
+
+for i, sub in enumerate(subjects_train):
+    subject_csv_eda = pd.read_csv(os.path.join(eda_train_path, sub), header=0)
+
+    for col in subject_csv_eda.columns:
+        values = subject_csv_eda[col].dropna().values
+
+        signals, info = nk.eda_process(values, sampling_rate = fs)
+        features = nk.eda_analyze(signals, sampling_rate=fs)
+
+        all_features_eda.append(features)
+
+        # Determine label from column name
+        col_upper = col.upper()
+        if "BASELINE" in col_upper:
+            label = 0
+        elif "LOW" in col_upper:
+            label = 1
+        elif "HIGH" in col_upper:
+            label = 2
+        elif "REST" in col_upper:
+            label = 3
+        else:
+            label = -1  # unknown or unexpected pattern
+
+        all_labels_eda.append(label)
+        all_column_names_eda.append(col)  # Use the actual column name
+        all_subject_ids_eda.append(sub.split(".")[0])  # Extract subject ID from filename
+
+features_df = pd.concat(all_features_eda, ignore_index=True)
